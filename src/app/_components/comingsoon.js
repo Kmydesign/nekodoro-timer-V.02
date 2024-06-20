@@ -2,49 +2,42 @@
 import { useState, useEffect } from 'react';
 
 export default function ComingSoon() {
-  // Initialize state for the countdown values
-  const [timeLeft, setTimeLeft] = useState({
-    days: 15,
-    hours: 0,
-    minutes: 0,
-    seconds: 0,
-  });
+  // Set the fixed release date (e.g., July 1, 2024, at 12:00 PM)
+  const targetDate = new Date('2024-09-01T12:00:00');
+
+  const calculateTimeLeft = () => {
+    const now = new Date().getTime();
+    const difference = targetDate - now;
+
+    let timeLeft = {
+      days: 0,
+      hours: 0,
+      minutes: 0,
+      seconds: 0,
+    };
+
+    if (difference > 0) {
+      timeLeft = {
+        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+        minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
+        seconds: Math.floor((difference % (1000 * 60)) / 1000),
+      };
+    }
+
+    return timeLeft;
+  };
+
+  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
 
   useEffect(() => {
-    // Set up an interval to update the countdown every second
     const timer = setInterval(() => {
-      setTimeLeft(prevTime => {
-        let { days, hours, minutes, seconds } = prevTime;
-
-        if (seconds > 0) {
-          seconds -= 1;
-        } else {
-          if (minutes > 0) {
-            minutes -= 1;
-            seconds = 59;
-          } else {
-            if (hours > 0) {
-              hours -= 1;
-              minutes = 59;
-              seconds = 59;
-            } else {
-              if (days > 0) {
-                days -= 1;
-                hours = 23;
-                minutes = 59;
-                seconds = 59;
-              }
-            }
-          }
-        }
-
-        return { days, hours, minutes, seconds };
-      });
+      setTimeLeft(calculateTimeLeft());
     }, 1000);
 
     // Clean up the interval on component unmount
     return () => clearInterval(timer);
-  }, []);
+  }, [targetDate]);
 
   return (
     <div className="card w-96 bg-secondary shadow-xl">
